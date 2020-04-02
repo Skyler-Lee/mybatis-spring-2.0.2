@@ -191,7 +191,7 @@ public class MapperScannerConfigurer
    * Specifies which {@code SqlSessionTemplate} to use in the case that there is more than one in the spring context.
    * Usually this is only needed when you have more than one datasource.
    * <p>
-   * 
+   *
    * @deprecated Use {@link #setSqlSessionTemplateBeanName(String)} instead
    *
    * @param sqlSessionTemplate
@@ -222,7 +222,7 @@ public class MapperScannerConfigurer
    * Specifies which {@code SqlSessionFactory} to use in the case that there is more than one in the spring context.
    * Usually this is only needed when you have more than one datasource.
    * <p>
-   * 
+   *
    * @deprecated Use {@link #setSqlSessionFactoryBeanName(String)} instead.
    *
    * @param sqlSessionFactory
@@ -253,7 +253,7 @@ public class MapperScannerConfigurer
    * Specifies a flag that whether execute a property placeholder processing or not.
    * <p>
    * The default is {@literal false}. This means that a property placeholder processing does not execute.
-   * 
+   *
    * @since 1.1.1
    *
    * @param processPropertyPlaceHolders
@@ -329,11 +329,12 @@ public class MapperScannerConfigurer
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @since 1.0.2
    */
   @Override
   public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+    //在 MapperScanRegistrar 中已经将 processPropertyPlaceHolders 设置为true
     if (this.processPropertyPlaceHolders) {
       processPropertyPlaceHolders();
     }
@@ -364,9 +365,13 @@ public class MapperScannerConfigurer
    * definition. Then update the values.
    */
   private void processPropertyPlaceHolders() {
+    //通过类型获取所有 PropertyResourceConfigurer 类型的bean，这里的bean从单例池中去拿，调用了getBean()
     Map<String, PropertyResourceConfigurer> prcs = applicationContext.getBeansOfType(PropertyResourceConfigurer.class);
 
+    //如果有 PropertyResourceConfigurer 类型的bean（applicationContext 实现了 ConfigurableApplicationContext）
     if (!prcs.isEmpty() && applicationContext instanceof ConfigurableApplicationContext) {
+      //beanName 是 MapperScannerConfigurer 存在 beanDefinitionMap 中的key，及：配置类全限定名+#+MapperScannerConfigurer+#+0
+      //这里根据这个beanName取出 MapperScannerConfigurer 的 BeanDefinition
       BeanDefinition mapperScannerBean = ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
           .getBeanDefinition(beanName);
 
@@ -387,9 +392,12 @@ public class MapperScannerConfigurer
       this.sqlSessionTemplateBeanName = updatePropertyValue("sqlSessionTemplateBeanName", values);
       this.lazyInitialization = updatePropertyValue("lazyInitialization", values);
     }
+    //获取并设置扫描包
     this.basePackage = Optional.ofNullable(this.basePackage).map(getEnvironment()::resolvePlaceholders).orElse(null);
+    //获取并设置 sqlSessionFactoryBeanName，如果没有配置则为 null
     this.sqlSessionFactoryBeanName = Optional.ofNullable(this.sqlSessionFactoryBeanName)
         .map(getEnvironment()::resolvePlaceholders).orElse(null);
+    //获取并设置 sqlSessionTemplateBeanName，如果没有配置则为 null
     this.sqlSessionTemplateBeanName = Optional.ofNullable(this.sqlSessionTemplateBeanName)
         .map(getEnvironment()::resolvePlaceholders).orElse(null);
     this.lazyInitialization = Optional.ofNullable(this.lazyInitialization).map(getEnvironment()::resolvePlaceholders)
