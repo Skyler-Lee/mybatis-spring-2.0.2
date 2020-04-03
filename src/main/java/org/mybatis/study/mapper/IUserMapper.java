@@ -9,4 +9,6 @@ public interface IUserMapper {
 
   @Select("select * from cdc_user")
   List<User> query();
+
+  User selectOne(String id);
 }

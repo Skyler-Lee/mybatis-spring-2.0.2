@@ -67,16 +67,23 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
 
   /**
    * {@inheritDoc}
+   *
+   * MapperFactoryBean最终实现了 InitializingBean接口，在 mapper进行初始化的时候会调用
+   * afterPropertiesSet()方法，这个方法是在父类DaoSupport中实现的，父类的实现方法中调用
+   * 了checkDaoConfig()方法，这里重写了这个方法，所以会执行这里的逻辑
    */
   @Override
   protected void checkDaoConfig() {
     super.checkDaoConfig();
 
+    //检查 mapperInterface 是否为空，这个 mapperInterface 就是 mapper 对应的接口，如XxxMapper
     notNull(this.mapperInterface, "Property 'mapperInterface' is required");
 
     Configuration configuration = getSqlSession().getConfiguration();
+    //如果 mapper 还没有被添加到 knownMappers 这个map中
     if (this.addToConfig && !configuration.hasMapper(this.mapperInterface)) {
       try {
+        //将mapper添加到 knownMappers 这个map中来，然后对 mapper 接口进行解析
         configuration.addMapper(this.mapperInterface);
       } catch (Exception e) {
         logger.error("Error while adding the mapper '" + this.mapperInterface + "' to configuration.", e);
