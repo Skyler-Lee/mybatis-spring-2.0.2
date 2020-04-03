@@ -339,21 +339,33 @@ public class MapperScannerConfigurer
       processPropertyPlaceHolders();
     }
 
+    /**
+     * new 一个扫描器，该扫描器继承了spring 的 ClassPathBeanDefinitionScanner
+     * 并重写了里面的 doScan()方法，定义真正执行扫描 mapper 的逻辑
+     */
     ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
-    scanner.setAddToConfig(this.addToConfig);
-    scanner.setAnnotationClass(this.annotationClass);
-    scanner.setMarkerInterface(this.markerInterface);
-    scanner.setSqlSessionFactory(this.sqlSessionFactory);
-    scanner.setSqlSessionTemplate(this.sqlSessionTemplate);
-    scanner.setSqlSessionFactoryBeanName(this.sqlSessionFactoryBeanName);
-    scanner.setSqlSessionTemplateBeanName(this.sqlSessionTemplateBeanName);
-    scanner.setResourceLoader(this.applicationContext);
+    //为扫描器设置相关属性
+    scanner.setAddToConfig(this.addToConfig);  //默认为 true
+    scanner.setAnnotationClass(this.annotationClass);  //没有设置，为null
+    scanner.setMarkerInterface(this.markerInterface);  //没有设置，为null
+    scanner.setSqlSessionFactory(this.sqlSessionFactory);  //没有设置，为null
+    scanner.setSqlSessionTemplate(this.sqlSessionTemplate);  //没有设置，为null
+    scanner.setSqlSessionFactoryBeanName(this.sqlSessionFactoryBeanName);  //没有设置，为null
+    scanner.setSqlSessionTemplateBeanName(this.sqlSessionTemplateBeanName);  //没有设置，为null
+    scanner.setResourceLoader(this.applicationContext);  //AnnotationConfigApplicationContext 对象
+    //设置beanName生成器，没有配置则设置为 AnnotationBeanNameGenerator
     scanner.setBeanNameGenerator(this.nameGenerator);
+    //设置 mapperFactoryBeanClass 属性，没有配置则设置为 MapperFactoryBean.class
     scanner.setMapperFactoryBeanClass(this.mapperFactoryBeanClass);
-    if (StringUtils.hasText(lazyInitialization)) {
+    if (StringUtils.hasText(lazyInitialization)) {  //没有设置，为null
       scanner.setLazyInitialization(Boolean.valueOf(lazyInitialization));
     }
+    //设置扫描过滤，告诉扫描器需要扫描什么东西
     scanner.registerFilters();
+    /**
+     * 将传进来的包名转为数组，循环数组开始进行扫描，这里调用了 spring的 ClassPathBeanDefinitionScanner 中的scan()方法，
+     * scan()中调用了 ClassPathMapperScanner 的doScan()方法，最终将扫描出来的类注册到 beanDefinitionMap 中
+     * */
     scanner.scan(
         StringUtils.tokenizeToStringArray(this.basePackage, ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
   }

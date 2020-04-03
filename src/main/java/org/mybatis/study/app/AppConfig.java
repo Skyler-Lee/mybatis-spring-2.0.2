@@ -16,7 +16,7 @@ import javax.sql.DataSource;
 public class AppConfig {
 
   @Bean
-  public DataSource getDataSource(){
+  public DataSource dataSource(){
     PooledDataSource dataSource = new PooledDataSource();
     dataSource.setDriver("com.mysql.cj.jdbc.Driver");
     dataSource.setUrl("jdbc:mysql://localhost:3306/exam?useUnicode=true&serverTimezone=UTC&useSSL=false&characterEncoding=utf8");
@@ -27,7 +27,7 @@ public class AppConfig {
 
   @Bean
   @Autowired
-  public SqlSessionFactoryBean getSqlSessionFactoryBean(DataSource dataSource){
+  public SqlSessionFactoryBean sqlSessionFactoryBean(DataSource dataSource){
     SqlSessionFactoryBean sqlSessionFactory =  new SqlSessionFactoryBean();
     sqlSessionFactory.setDataSource(dataSource);
     return sqlSessionFactory;
