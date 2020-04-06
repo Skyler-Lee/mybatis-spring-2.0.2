@@ -80,7 +80,13 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
     notNull(this.mapperInterface, "Property 'mapperInterface' is required");
 
     Configuration configuration = getSqlSession().getConfiguration();
-    //如果 mapper 还没有被添加到 knownMappers 这个map中
+    /**
+     * 如果 mapper 还没有被添加到 knownMappers 这个map中，说明 mapper 还没有被处理
+     * 这个map非常重要，存放的是一个mapper代理工厂，每一个被处理的mapper都会在该map
+     * 中对应一个mapper代理工厂，当获取mapper代理类的时候，会通过该工厂产生一个真正
+     * 的mapper代理类（MapperProxy），调用mapper接口中的方法实际上执行的就是
+     * MapperProxy 中的 invoke()方法
+     */
     if (this.addToConfig && !configuration.hasMapper(this.mapperInterface)) {
       try {
         //将mapper添加到 knownMappers 这个map中来，然后对 mapper 接口进行解析
@@ -96,6 +102,11 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
 
   /**
    * {@inheritDoc}
+   *
+   * 获取mapper接口代理类的时候（被作为依赖进行注入时也会获取mapper的代理类），会执行该方法拿到一个对象
+   * 这里返回的对象才是mapper接口真正的代理类对象，mybatis-spring中，getSqlSession()拿到的SqlSession对象
+   * 是一个SqlSessionTemplate对象，getMapper()方法其实是从 knownMappers 这个map中获取到该mapper的一个代理
+   * 工厂，然后通过mapper代理工厂生成一个mapper代理类（MapperProxy），生成代理类使用的是JDK动态代理
    */
   @Override
   public T getObject() throws Exception {
